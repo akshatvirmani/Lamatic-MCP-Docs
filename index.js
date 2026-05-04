@@ -88,3 +88,4 @@ server.registerTool(
 const transport = new StdioServerTransport();
 await server.connect(transport);
 process.stderr.write("Lamatic Docs MCP running\n");
+

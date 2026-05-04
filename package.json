@@ -1,19 +1,22 @@
 {
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
-    "axios": "^1.14.0",
-    "dotenv": "^17.4.1",
-    "lamatic": "^0.3.2"
-  },
-  "type": "module",
   "name": "mcpdocs",
   "version": "1.0.0",
+  "description": "Public MCP server for Lamatic.ai documentation",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "axios": "^1.14.0",
+    "dotenv": "^17.4.1",
+    "lamatic": "^0.3.2",
+    "next": "^14.0.0"
+  }
 }
