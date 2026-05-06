@@ -39,7 +39,7 @@ export default function Home() {
 {`{
   "mcpServers": {
     "lamatic-docs": {
-      "url": "https://lamatic-mcp-docs.vercel.app/api/mcp"
+      "url": "https://docmcp.lamatic.ai/api/mcp"
     }
   }
 }`}
