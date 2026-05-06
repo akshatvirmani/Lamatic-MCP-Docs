@@ -10,7 +10,7 @@ Add this to your MCP client config:
 {
   "mcpServers": {
     "lamatic-docs": {
-      "url": "https://lamatic-mcp-docs.vercel.app/api/mcp"
+      "url": "https://docmcp.lamatic.ai/api/mcp"
     }
   }
 }
@@ -68,7 +68,7 @@ Built entirely on Lamatic:
 ## MCP Endpoint
 
 ```
-https://lamatic-mcp-docs.vercel.app/api/mcp
+https://docmcp.lamatic.ai/api/mcp
 ```
 
 ## Local Development
