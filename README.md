@@ -38,5 +38,16 @@ Tool definitions live in [`tools/registry.js`](tools/registry.js), shared by bot
 To test the local stdio MCP, use the command below:
 
 ```bash
-node mcp-test.js
+git clone https://github.com/Lamatic/Lamatic-MCP-Docs
+cd Lamatic-MCP-Docs
+npm install
+cp .env.example .env  # fill in your Lamatic credentials
+npm run dev
 ```
+
+## Links
+
+- [Lamatic.ai](https://lamatic.ai)
+- [Lamatic Docs](https://lamatic.ai/docs)
+- [MCP Endpoint](https://lamatic-mcp-docs.vercel.app/api/mcp)
+- [Live Homepage](https://lamatic-mcp-docs.vercel.app)
