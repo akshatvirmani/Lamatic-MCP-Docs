@@ -1,3 +1,7 @@
+import { TOOLS } from "../tools/registry.js";
+
+const HTTP_TOOLS = TOOLS.filter((t) => t.surfaces.includes("http"));
+
 export default function Home() {
   return (
     <main style={{ fontFamily: "system-ui, sans-serif", maxWidth: "680px", margin: "60px auto", padding: "0 24px" }}>
@@ -58,14 +62,18 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Tool */}
+      {/* Tools */}
       <section style={{ marginBottom: "32px" }}>
-        <h2 style={{ fontSize: "20px", fontWeight: "600", marginBottom: "12px" }}>Available Tool</h2>
-        <div style={{ border: "1px solid #e5e7eb", borderRadius: "8px", padding: "16px" }}>
-          <code style={{ fontWeight: "600", color: "#7c3aed" }}>query_docs</code>
-          <p style={{ color: "#666", fontSize: "14px", marginTop: "6px", marginBottom: 0 }}>
-            Ask any question about Lamatic.ai documentation. Uses RAG to search across all indexed docs and return a precise answer.
-          </p>
+        <h2 style={{ fontSize: "20px", fontWeight: "600", marginBottom: "12px" }}>Available Tools</h2>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          {HTTP_TOOLS.map((tool) => (
+            <div key={tool.name} style={{ border: "1px solid #e5e7eb", borderRadius: "8px", padding: "16px" }}>
+              <code style={{ fontWeight: "600", color: "#7c3aed" }}>{tool.name}</code>
+              <p style={{ color: "#666", fontSize: "14px", marginTop: "6px", marginBottom: 0 }}>
+                {tool.description}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 

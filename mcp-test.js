@@ -8,9 +8,9 @@ const request = JSON.stringify({
   method: "tools/call",
   params: {
     name: "query_docs",
-arguments: {
-  question: "What are sticky notes in Lamatic?"
-}
+    arguments: {
+      text: "What are sticky notes in Lamatic?"
+    }
   }
 }) + "\n";
 

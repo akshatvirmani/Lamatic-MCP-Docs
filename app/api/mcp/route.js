@@ -1,74 +1,17 @@
 import { NextResponse } from "next/server";
-import axios from "axios";
+import { z } from "zod";
+import { TOOLS as ALL_TOOLS } from "../../../tools/registry.js";
 
-// ── Config from Vercel env vars ───────────────────────
-const config = {
-  endpoint:   process.env.LAMATIC_ENDPOINT,
-  apiKey:     process.env.LAMATIC_API_KEY,
-  projectId:  process.env.LAMATIC_PROJECT_ID,
-  workflowId: process.env.LAMATIC_WORKFLOW_ID,
-};
+// Only tools that can run against a shared, remote, stateless server —
+// see tools/registry.js for which tools are stdio-only and why.
+const HTTP_TOOLS = ALL_TOOLS.filter((t) => t.surfaces.includes("http"));
 
-// ── Lamatic flow call ─────────────────────────────────
-async function queryDocs(text) {
-  const query = `
-    query ExecuteWorkflow($workflowId: String!, $question: String) {
-      executeWorkflow(
-        workflowId: $workflowId
-        payload: { question: $question }
-      ) {
-        status
-        result
-      }
-    }
-  `;
-
-  console.log("Calling:", config.endpoint, "| workflowId:", config.workflowId, "| projectId:", config.projectId);
-
-  let response;
-  try {
-    response = await axios.post(
-      config.endpoint,
-      { query, variables: { workflowId: config.workflowId, question: text } },
-      {
-        headers: {
-          Authorization: `Bearer ${config.apiKey}`,
-          "Content-Type": "application/json",
-          "x-project-id": config.projectId,
-        },
-      }
-    );
-    console.log("Response data:", JSON.stringify(response.data, null, 2));
-  } catch (err) {
-    console.error("Axios error status:", err.response?.status);
-    console.error("Axios error data:", JSON.stringify(err.response?.data, null, 2));
-    throw new Error(JSON.stringify(err.response?.data ?? err.message));
-  }
-
-  if (response.data.errors) throw new Error(JSON.stringify(response.data.errors));
-
-  const result = response.data?.data?.executeWorkflow?.result;
-  return result?.modelResponse ?? result?.answer ?? JSON.stringify(result);
-}
-
-// ── MCP tool definitions ──────────────────────────────
-const TOOLS = [
-  {
-    name: "query_docs",
-    description:
-      "Ask any question about Lamatic.ai documentation. Uses RAG to search across all indexed docs and return a precise answer.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        text: {
-          type: "string",
-          description: "The question to ask e.g. 'How do I set up a GraphQL trigger?'",
-        },
-      },
-      required: ["text"],
-    },
-  },
-];
+// ── MCP tool definitions (JSON Schema, derived from the shared zod schemas) ──
+const TOOLS = HTTP_TOOLS.map((t) => ({
+  name: t.name,
+  description: t.description,
+  inputSchema: z.toJSONSchema(t.schema),
+}));
 
 // ── MCP message handler ───────────────────────────────
 async function handleMCPMessage(body) {
@@ -83,31 +26,29 @@ async function handleMCPMessage(body) {
   if (method === "tools/call") {
     const { name, arguments: args } = params;
 
-    if (name === "query_docs") {
-      try {
-        const answer = await queryDocs(args.text);
-        return {
-          jsonrpc: "2.0",
-          id,
-          result: { content: [{ type: "text", text: answer }] },
-        };
-      } catch (err) {
-        return {
-          jsonrpc: "2.0",
-          id,
-          result: {
-            content: [{ type: "text", text: `Error: ${err.message}` }],
-            isError: true,
-          },
-        };
-      }
+    const tool = HTTP_TOOLS.find((t) => t.name === name);
+    if (!tool) {
+      return {
+        jsonrpc: "2.0",
+        id,
+        error: { code: -32601, message: `Unknown tool: ${name}` },
+      };
     }
 
-    return {
-      jsonrpc: "2.0",
-      id,
-      error: { code: -32601, message: `Unknown tool: ${name}` },
-    };
+    try {
+      const parsedArgs = tool.schema.parse(args ?? {});
+      const result = await tool.handler(parsedArgs);
+      return { jsonrpc: "2.0", id, result };
+    } catch (err) {
+      return {
+        jsonrpc: "2.0",
+        id,
+        result: {
+          content: [{ type: "text", text: `Error: ${err.message}` }],
+          isError: true,
+        },
+      };
+    }
   }
 
   // initialize
